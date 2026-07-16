@@ -2,7 +2,7 @@
 $AppDataPath = "$env:APPDATA\AnyDesk"
 $LocalPath = "$env:LOCALAPPDATA\AnyDesk"
 
-# Chiude AnyDesk se è rimasto appeso (evita popup di installazione)
+# Chiude AnyDesk se Ã¨ rimasto appeso
 Stop-Process -Name "AnyDesk*" -Force -ErrorAction SilentlyContinue
 
 if (Test-Path $AppDataPath) {
@@ -14,7 +14,32 @@ if (Test-Path $LocalPath) {
     Remove-Item -Path $LocalPath -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-# 2. Avvio di AnyDesk (Percorso dell'eseguibile originale)
-# Cambia questo percorso con quello dove tieni il vero AnyDesk.exe
-$AnyDeskExe = "F:\app-Ryzen\AnyDesk.exe" 
-Start-Process -FilePath $AnyDeskExe
+# 2. Avvio di AnyDesk generico
+# Cerca in alcuni percorsi comuni
+$PossiblePaths = @(
+    "$env:ProgramFiles(x86)\AnyDesk\AnyDesk.exe",
+    "$env:ProgramFiles\AnyDesk\AnyDesk.exe",
+    "$env:USERPROFILE\Desktop\AnyDesk.exe",
+    "$env:USERPROFILE\Downloads\AnyDesk.exe"
+)
+
+$AnyDeskExe = $null
+
+foreach ($Path in $PossiblePaths) {
+    if (Test-Path $Path) {
+        $AnyDeskExe = $Path
+        break
+    }
+}
+
+# Se non trovato, chiede all'utente dove si trova
+if (-not $AnyDeskExe) {
+    $AnyDeskExe = Read-Host "AnyDesk non trovato automaticamente. Incolla qui il percorso completo dell'eseguibile (es. C:\Cartella\AnyDesk.exe)"
+}
+
+if (Test-Path $AnyDeskExe) {
+    Start-Process -FilePath $AnyDeskExe
+} else {
+    Write-Host "Errore: Percorso non valido." -ForegroundColor Red
+    Pause
+}
