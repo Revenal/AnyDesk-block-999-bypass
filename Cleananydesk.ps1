@@ -1,26 +1,26 @@
-# 1. Pulizia chirurgica dei file che causano il blocco 999
-$AppDataPath = "$env:APPDATA\AnyDesk"
-$LocalPath = "$env:LOCALAPPDATA\AnyDesk"
+# 1. Clean up files causing error 999
+$AppDataPath = “$env:APPDATA\AnyDesk”
+$LocalPath = “$env:LOCALAPPDATA\AnyDesk”
 
-# Chiude AnyDesk se è rimasto appeso
-Stop-Process -Name "AnyDesk*" -Force -ErrorAction SilentlyContinue
+# Close AnyDesk if it has hung
+Stop-Process -Name “AnyDesk*” -Force -ErrorAction SilentlyContinue
 
 if (Test-Path $AppDataPath) {
-    Remove-Item -Path "$AppDataPath\service.conf" -Force -ErrorAction SilentlyContinue
-    Remove-Item -Path "$AppDataPath\system.conf" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path “$AppDataPath\service.conf” -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path “$AppDataPath\system.conf” -Force -ErrorAction SilentlyContinue
 }
 
 if (Test-Path $LocalPath) {
     Remove-Item -Path $LocalPath -Recurse -Force -ErrorAction SilentlyContinue
 }
 
-# 2. Avvio di AnyDesk generico
-# Cerca in alcuni percorsi comuni
+# 2. Generic AnyDesk startup
+# Searches common locations
 $PossiblePaths = @(
-    "$env:ProgramFiles(x86)\AnyDesk\AnyDesk.exe",
-    "$env:ProgramFiles\AnyDesk\AnyDesk.exe",
-    "$env:USERPROFILE\Desktop\AnyDesk.exe",
-    "$env:USERPROFILE\Downloads\AnyDesk.exe"
+    “$env:ProgramFiles(x86)\AnyDesk\AnyDesk.exe”,
+    “$env:ProgramFiles\AnyDesk\AnyDesk.exe”,
+    “$env:USERPROFILE\Desktop\AnyDesk.exe”,
+    “$env:USERPROFILE\Downloads\AnyDesk.exe”
 )
 
 $AnyDeskExe = $null
@@ -32,14 +32,14 @@ foreach ($Path in $PossiblePaths) {
     }
 }
 
-# Se non trovato, chiede all'utente dove si trova
+# If not found, ask the user for the location
 if (-not $AnyDeskExe) {
-    $AnyDeskExe = Read-Host "AnyDesk non trovato automaticamente. Incolla qui il percorso completo dell'eseguibile (es. C:\Cartella\AnyDesk.exe)"
+    $AnyDeskExe = Read-Host "AnyDesk was not found automatically. Paste the full path to the executable here (e.g., C:\Folder\AnyDesk.exe)"
 }
 
 if (Test-Path $AnyDeskExe) {
     Start-Process -FilePath $AnyDeskExe
 } else {
-    Write-Host "Errore: Percorso non valido." -ForegroundColor Red
+    Write-Host “Error: Invalid path.” -ForegroundColor Red
     Pause
 }
